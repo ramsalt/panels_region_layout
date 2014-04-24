@@ -22,6 +22,17 @@ function panels_region_layout_menu() {
 }
 
 /**
+ * Implements hook_init().
+ */
+function panels_region_layout_init() {
+  // Add js and CSS specific to Panels In-place-editor if the user has access.
+  if (user_access('use panels in place editing')) {
+    drupal_add_css(drupal_get_path('module', 'panels_region_layout') . '/css/panels-region-layout.css');
+    drupal_add_js(drupal_get_path('module', 'panels_region_layout') . '/js/panels-region-layout.js', array('weight'=>100));
+  }
+}
+
+/**
  * Implements hook_theme().
  */
 function panels_region_layout_theme() {

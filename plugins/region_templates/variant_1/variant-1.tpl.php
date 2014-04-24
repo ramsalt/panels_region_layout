@@ -1,6 +1,5 @@
 <?php
 $item_chunks = array_chunk($items, 5);
-dsm($item_chunks);
 ?>
 <div class="region-layout layout-variant-1 clearfix" <?php if (!empty($css_id)) { print "id=\"$css_id\""; } ?>>
 <?php 

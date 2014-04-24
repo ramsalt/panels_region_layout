@@ -28,9 +28,9 @@ function theme_panels_region_layout_templates_style_render_region($vars) {
     $items[] = $item;
   }
 
-  dsm(panels_region_layout_get_templates());
+  // dsm(panels_region_layout_get_templates());
 
-  dsm($vars);
+  // dsm($vars);
 
   $output = array(
     'items' => $items,

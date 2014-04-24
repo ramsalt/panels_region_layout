@@ -1,0 +1,108 @@
+<?php
+
+/**
+ * @file panels_region_layout.module
+ * TODO: Enter file description here.
+ */
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function panels_region_layout_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'panels' OR $module == 'panels_region_layout') {
+    return 'plugins/' . $plugin;
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function panels_region_layout_menu() {
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function panels_region_layout_theme() {
+  $module_path = drupal_get_path('module', 'panels_region_layout');
+
+  $theme = array();
+  $theme['panels_region_layout_region_style'] = array(
+    'render element' => 'element',
+    'template' => 'panels-region-layout-region-style',
+    'path' => $module_path . '/theme',
+  );
+
+  // Register layout and style themes on behalf of all of these items.
+  ctools_include('plugins', 'panels');
+
+  // No need to worry about files; the plugin has to already be loaded for us
+  // to even know what the theme function is, so files will be auto included.
+  $layouts = panels_region_layout_get_templates();
+  foreach ($layouts as $name => $data) {
+      if (!empty($data['theme'])) {
+        $theme[$data['theme']] = array(
+          'variables' => array('css_id' => NULL, 'items' => NULL, 'settings' => NULL, 'display' => NULL, 'layout' => NULL, 'renderer' => NULL),
+          'path' => $data['path'],
+          'file' => $data['file'],
+        );
+
+        // if no theme function exists, assume template.
+        if (!function_exists("theme_$data[theme]")) {
+          $theme[$data['theme']]['template'] = str_replace('_', '-', $data['theme']);
+          $theme[$data['theme']]['file'] = $data['file']; // for preprocess.
+        }
+      }
+  }
+
+  return $theme;
+}
+
+function panels_region_layout_get_templates () {
+  ctools_include('plugins');
+  return ctools_get_plugins('panels_region_layout', 'region_templates');
+}
+
+/**
+ * Implements hook_ctools_plugin_type().
+ *
+ * Register layout, style, cache, and display_renderer plugin types, declaring
+ * relevant plugin type information as necessary.
+ */
+function panels_region_layout_ctools_plugin_type() {
+  return array(
+    'region_templates' => array(
+      'load themes' => TRUE, // Can define layouts in themes
+      //'process' => 'panels_layout_process',
+      'child plugins' => TRUE,
+    ),
+  );
+}
+
+function panels_region_layout_panels_ipe_region_links_alter (&$links, $context) {
+  $renderer = $context['renderer'];
+  $region_id = $context['region_id'];
+
+  // dsm($links);
+  // dsm($context);
+  //dsm($renderer);
+  
+  if(isset($context['display']->panel_settings[$region_id]['style']) AND $context['display']->panel_settings[$region_id]['style'] == 'templates') {
+    // Add option to change template
+
+    if($renderer->plugin['module'] == 'panels_ipe_flexible') {
+      if (user_access('administer panels styles')) {
+        $links['region_template'] = array(
+          'title' => '<span>' . t('Region template') . '</span>',
+          'href' => $renderer->get_url('select-template', $region_id),
+          'html' => TRUE,
+          'attributes' => array(
+            'class' => array('ctools-use-modal', 'panels-ipe-hide-bar', 'template'),
+            'title' => t('Region style'),
+          ),
+        );
+      }  
+    }
+  }
+}
